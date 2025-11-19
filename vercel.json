@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/Postcard Editor Pro.html" }
+  ]
+}
