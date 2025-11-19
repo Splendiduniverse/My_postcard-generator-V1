@@ -3,201 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Postcard Editor Pro AI - Chạy mọi trình duyệt</title>
+    <title>Postcard Editor Pro AI - Flux AI (Full Fixed)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@700&family=Dancing+Script:wght@700&display=swap');
-        
-        body { font-family: 'Inter', sans-serif; background: #f3f4f6; padding: 20px; }
-        .container { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
-        @media (max-width: 1024px) { .container { grid-template-columns: 1fr; } }
-        
-        .panel { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 25px; }
-        h1 { font-size: 2.5rem; font-weight: bold; text-align: center; color: #2563eb; margin-bottom: 10px; }
-        
-        .tabs { display: flex; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px; }
-        .tab-btn { padding: 12px 24px; font-weight: 600; cursor: pointer; border-bottom: 4px solid transparent; }
-        .tab-btn.active { border-bottom: 4px solid #2563eb; color: #2563eb; }
-        
-        button { cursor: pointer; transition: all 0.2s; }
-        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; margin-top: 5px; }
-        textarea { resize: vertical; }
-        
-        .layer-btn { padding: 12px; text-align: center; border-radius: 12px; font-size: 0.9rem; }
-        .layer-btn.active { background: #dbeafe !important; border: 2px solid #2563eb !important; }
-        
-        .ratio-btn { padding: 20px; font-weight: bold; border-radius: 12px; border: 3px solid #d1d5db; text-align: center; }
-        .ratio-btn.active { border-color: #2563eb; background: #eff6ff; }
-        
-        #postcard-container { position: relative; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
-        #postcard-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1e293b; background-size: cover; background-position: center; }
-        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Dancing+Script:wght@400..700&display=swap');
+        .font-inter { font-family: 'Inter', sans-serif; }
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .font-dancing { font-family: 'Dancing Script', cursive; }
+
+        #postcard-container { width: 100%; max-width: 1000px; margin: 0 auto; position: relative; }
+        #postcard-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; transition: all 0.3s ease; }
+
         .aspect-16-9 { padding-top: 56.25%; }
         .aspect-1-1 { padding-top: 100%; }
-        .aspect-3-2 { padding-top: 66.67%; }
+        .aspect-3-2 { padding-top: 66.66%; }
         .aspect-2-3 { padding-top: 150%; }
-        .aspect-7-5 { padding-top: 71.43%; }
+        .aspect-7-5 { padding-top: 71.42%; }
         .aspect-5-7 { padding-top: 140%; }
-        .aspect-current { padding-top: 56.25%; } /* default */
-        
-        .layer-text { position: absolute; user-select: none; cursor: move; transform: translate(-50%, -50%); }
-        .layer-selected { outline: 3px dashed #60a5fa; background: rgba(96,165,250,0.2); border-radius: 8px; }
-        .text-shadow { text-shadow: 3px 3px 8px rgba(0,0,0,0.8); }
-        
-        .loading { position: fixed; inset: 0; background: rgba(0,0,0,0.8); color: white; display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 999; }
-        .spinner { width: 60px; height: 60px; border: 6px solid #f3f4f6; border-top: 6px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .layer-text { user-select: none; cursor: move; }
+        .text-shadow-custom { text-shadow: 2px 2px 8px rgba(0,0,0,0.8); }
+        .layer-selected { outline: 3px dashed #3B82F6; background: rgba(59,130,246,0.15); border-radius: 8px; }
     </style>
 </head>
-<body>
-<div class="container">
-    <div class="panel">
-        <h1>Postcard Editor Pro AI</h1>
-        <div class="tabs">
-            <div class="tab-btn active" onclick="openTab(1)">Layers & AI</div>
-            <div class="tab-btn" onclick="openTab(2)">Kích thước</div>
-            <div class="tab-btn" onclick="openTab(3)">Xuất</div>
+<body class="bg-gray-100 font-inter p-6">
+<div class="max-w-7xl mx-auto grid lg:grid-cols-3 gap-8">
+    <!-- Panel điều khiển -->
+    <div class="bg-white rounded-2xl shadow-2xl p-8 space-y-6">
+        <h1 class="text-4xl font-bold text-center text-blue-600">Postcard Editor Pro AI</h1>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-300">
+            <button onclick="openTab(1)" class="tab-btn px-6 py-3 font-bold border-b-4 border-blue-600 text-blue-600">Layers & AI</button>
+            <button onclick="openTab(2)" class="tab-btn px-6 py-3 font-bold text-gray-600">Kích thước</button>
+            <button onclick="openTab(3)" class="tab-btn px-6 py-3 font-bold text-gray-600">Xuất file</button>
         </div>
 
         <!-- Tab 1 -->
-        <div id="tab1">
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
-                <button class="layer-btn active" onclick="select(2)">L2 Tiêu đề</button>
-                <button class="layer-btn" onclick="select(3)">L3 Nội dung</button>
-                <button class="layer-btn" onclick="select(4)">L4 Credit</button>
-                <button class="layer-btn" onclick="select(5)">L5 Phụ đề</button>
-                <button class="layer-btn" onclick="select(6)">L6 Ghi chú</button>
-                <button class="layer-btn" onclick="select(7)">L7 Ký tên</button>
+        <div id="tab1" class="space-y-6">
+            <div class="grid grid-cols-3 gap-3 text-xs">
+                <button onclick="selectLayer(2)" class="py-3 rounded-lg bg-blue-100 text-blue-800 font-bold">L2 Tiêu đề</button>
+                <button onclick="selectLayer(3)" class="py-3 rounded-lg bg-gray-100 hover:bg-gray-200">L3 Nội dung</button>
+                <button onclick="selectLayer(4)" class="py-3 rounded-lg bg-gray-100 hover:bg-gray-200">L4 Credit</button>
+                <button onclick="selectLayer(5)" class="py-3 rounded-lg bg-gray-100 hover:bg-gray-200">L5 Phụ đề</button>
+                <button onclick="selectLayer(6)" class="py-3 rounded-lg bg-gray-100 hover:bg-gray-200">L6 Ghi chú</button>
+                <button onclick="selectLayer(7)" class="py-3 rounded-lg bg-gray-100 hover:bg-gray-200">L7 Ký tên</button>
             </div>
 
-            <div style="background:#dbeafe;padding:15px;border-radius:12px;margin-bottom:20px;">
-                <input type="color" id="bgcolor" value="#1e293b" style="width:100%;height:40px;" onchange="canvas.style.backgroundColor=this.value;canvas.style.backgroundImage='none'">
-                <textarea id="prompt" placeholder="Mô tả ảnh nền AI..." style="height:80px;margin-top:10px;"></textarea>
-                <button onclick="genImg()" style="margin-top:10px;width:100%;background:#2563eb;color:white;padding:12px;border-radius:8px;font-weight:bold;">Tạo ảnh nền AI</button>
+            <!-- Nền AI -->
+            <div class="p-5 bg-blue-50 rounded-xl space-y-4">
+                <h3 class="font-bold text-blue-800">Layer 01 - Nền (Flux AI)</h3>
+                <input type="color" id="bgcolor" value="#1e293b" class="w-full h-10 rounded" onchange="setBgColor(this.value)">
+                <textarea id="bg-prompt" class="w-full p-3 border rounded" rows="3" placeholder="Ví dụ: hoàng hôn trên biển, tranh sơn dầu, lãng mạn..."></textarea>
+                <button onclick="generateBg()" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:from-purple-700 hover:to-blue-700 shadow-lg">✨ Tạo nền bằng Flux AI (siêu đẹp)</button>
             </div>
 
-            <textarea id="txt" placeholder="Nội dung layer..." style="height:120px;" oninput="L(current).innerText=this.value"></textarea>
+            <textarea id="textcontent" class="w-full p-4 border rounded text-lg" rows="5" oninput="updateLayerText()"></textarea>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;">
-                <button onclick="suggest()" style="background:#10b981;color:white;padding:12px;border-radius:8px;">Gợi ý</button>
-                <button onclick="critique()" style="background:#f59e0b;color:white;padding:12px;border-radius:8px;">Đánh giá</button>
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;">
-                <select onchange="L(current).style.fontFamily=this.value">
-                    <option value="'Playfair Display'">Playfair</option>
-                    <option value="'Dancing Script'">Dancing Script</option>
-                    <option value="'Inter'">Inter</option>
+            <div class="grid grid-cols-2 gap-4">
+                <select id="fontfam" onchange="setStyle('font-family',this.value)" class="p-3 border rounded">
+                    <option value="font-inter">Inter</option>
+                    <option value="font-playfair">Playfair Display</option>
+                    <option value="font-dancing">Dancing Script</option>
                 </select>
-                <input type="number" min="10" max="200" value="48" onchange="L(current).style.fontSize=this.value+'px'">
-                <input type="color" value="#ffffff" onchange="L(current).style.color=this.value">
-                <select onchange="L(current).style.textAlign=this.value">
-                    <option value="left">Trái</option>
-                    <option value="center">Giữa</option>
-                    <option value="right">Phải</option>
-                </select>
+                <input type="number" id="fontsize" min="10" max="300" value="48" onchange="setStyle('font-size',this.value+'px')" class="p-3 border rounded">
+                <input type="color" id="textcolor" value="#ffffff" onchange="setStyle('color',this.value)" class="h-12">
+                <button onclick="toggleBold()" class="py-3 font-bold bg-gray-200 rounded">Bold</button>
+                <button onclick="toggleItalic()" class="py-3 italic bg-gray-200 rounded">Italic</button>
+                <button onclick="toggleShadow()" class="py-3 bg-gray-200 rounded col-span-2">Shadow</button>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;">
-                <button onclick="L(current).classList.toggle('font-bold')">Bold</button>
-                <button onclick="L(current).classList.toggle('italic')">Italic</button>
-                <button onclick="L(current).classList.toggle('text-shadow')">Shadow</button>
-            </div>
-            <div style="margin-top:15px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-                <input type="number" id="x" value="50" min="0" max="100" onchange="pos()"> <label>X%</label>
-                <input type="number" id="y" value="50" min="0" max="100" onchange="pos()"> <label>Y%</label>
-                <input type="number" id="rot" value="0" onchange="pos()"> <label>Rotate°</label>
+
+            <div class="grid grid-cols-3 gap-3 text-sm">
+                <input type="number" id="posx" min="0" max="100" value="50" oninput="updatePos()" class="p-2 border text-center"><label>X %</label>
+                <input type="number" id="posy" min="0" max="100" value="50" oninput="updatePos()" class="p-2 border text-center"><label>Y %</label>
+                <input type="number" id="rotate" min="-180" max="180" value="0" oninput="updatePos()" class="p-2 border text-center"><label>Rotate °</label>
             </div>
         </div>
 
-        <!-- Tab 2 -->
-        <div id="tab2" style="display:none;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-                <button class="ratio-btn active" onclick="ratio('16-9')">16:9</button>
-                <button class="ratio-btn" onclick="ratio('1-1')">1:1</button>
-                <button class="ratio-btn" onclick="ratio('3-2')">3:2</button>
-                <button class="ratio-btn" onclick="ratio('2-3')">2:3</button>
-                <button class="ratio-btn" onclick="ratio('7-5')">7:5</button>
-                <button class="ratio-btn" onclick="ratio('5-7')">5:7</button>
+        <!-- Tab 2: Kích thước -->
+        <div id="tab2" class="hidden space-y-6">
+            <h3 class="text-2xl font-bold">Tỷ lệ khung hình</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="setRatio('16-9')" class="ratio-btn py-5 rounded-xl border-4 border-blue-600 bg-blue-50 font-bold text-lg">16:9 Ngang</button>
+                <button onclick="setRatio('1-1')" class="ratio-btn py-5 rounded-xl border-2 border-gray-300 hover:border-blue-600">1:1 Vuông</button>
+                <button onclick="setRatio('3-2')" class="ratio-btn py-5 rounded-xl border-2 border-gray-300 hover:border-blue-600">3:2</button>
+                <button onclick="setRatio('2-3')" class="ratio-btn py-5 rounded-xl border-2 border-gray-300 hover:border-blue-600">2:3 Dọc</button>
+                <button onclick="setRatio('7-5')" class="ratio-btn py-5 rounded-xl border-2 border-gray-300 hover:border-blue-600">7:5</button>
+                <button onclick="setRatio('5-7')" class="ratio-btn py-5 rounded-xl border-2 border-gray-300 hover:border-blue-600">5:7 Dọc</button>
             </div>
         </div>
 
         <!-- Tab 3 -->
-        <div id="tab3" style="display:none;">
-            <button onclick="savePNG()" style="width:100%;background:#ec4899;color:white;padding:15px;border-radius:12px;font-size:1.2rem;margin-bottom:10px;">Tải PNG</button>
-            <button onclick="saveJPG()" style="width:100%;background:#f43f5e;color:white;padding:15px;border-radius:12px;font-size:1.2rem;">Tải JPG</button>
+        <div id="tab3" class="hidden space-y-6">
+            <button onclick="exportPNG()" class="w-full bg-pink-600 text-white py-5 rounded-xl text-2xl font-bold shadow-lg">Tải PNG</button>
+            <button onclick="exportJPG()" class="w-full bg-rose-600 text-white py-5 rounded-xl text-2xl font-bold shadow-lg">Tải JPG</button>
         </div>
     </div>
 
-    <div>
-        <div id="postcard-container" class="aspect-current">
-            <div id="canvas" class="postcard-canvas">
-                <div class="layer-text layer-selected" id="l2" style="top:15%;left:50%;font-size:80px;color:white;font-family:'Playfair Display',serif;font-weight:bold;">Tiêu đề đẹp</div>
-                <div class="layer-text" id="l3" style="top:50%;left:50%;font-size:32px;color:white;text-align:center;line-height:1.6;">Chúc bạn luôn hạnh phúc và thành công!</div>
-                <div class="layer-text" id="l4" style="bottom:8%;left:50%;font-size:14px;color:#e2e8f0;">© 2025</div>
-                <div class="layer-text" id="l5" style="top:30%;left:50%;font-size:40px;color:#e2e8f0;font-style:italic;font-family:'Dancing Script',cursive;">Phụ đề lãng mạn</div>
-                <div class="layer-text" id="l6" style="top:70%;left:50%;font-size:20px;color:#cbd5e1;">Ghi chú nhỏ</div>
-                <div class="layer-text" id="l7" style="bottom:20%;right:10%;font-size:60px;color:white;font-family:'Dancing Script',cursive;font-style:italic;">Ký tên</div>
+    <!-- Canvas -->
+    <div class="lg:col-span-2">
+        <div id="postcard-container" class="aspect-16-9 relative shadow-2xl rounded-3xl overflow-hidden">
+            <div id="postcard-canvas" class="absolute inset-0 bg-slate-900">
+                <div id="l2" class="layer-text layer-selected absolute text-white font-playfair text-9xl font-bold text-center" style="top:12%;left:50%;transform:translate(-50%,-50%)">Tiêu đề</div>
+                <div id="l3" class="layer-text absolute text-white text-4xl text-center leading-relaxed px-10" style="top:50%;left:50%;transform:translate(-50%,-50%)">Chúc bạn luôn hạnh phúc!</div>
+                <div id="l4" class="layer-text absolute text-gray-300 text-sm text-center" style="bottom:5%;left:50%;transform:translateX(-50%)">© 2025</div>
+                <div id="l5" class="layer-text absolute text-gray-200 text-5xl italic text-center" style="top:28%;left:50%;transform:translate(-50%,-50%)">Phụ đề</div>
+                <div id="l6" class="layer-text absolute text-gray-400 text-xl text-center" style="top:72%;left:50%;transform:translate(-50%,-50%)">Ghi chú</div>
+                <div id="l7" class="layer-text absolute text-white font-dancing text-7xl italic text-right" style="bottom:18%;right:10%">Ký tên</div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="loading" id="loading">
-    <div class="spinner"></div>
-    <h2>Đang xử lý...</h2>
+<!-- Loading -->
+<div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+    <div class="bg-white p-12 rounded-3xl text-center shadow-2xl">
+        <div class="animate-spin h-20 w-20 border-8 border-blue-600 rounded-full border-t-transparent mx-auto mb-6"></div>
+        <p class="text-3xl font-bold text-blue-600">Flux AI đang vẽ nền cho bạn...</p>
+    </div>
 </div>
 
 <script>
-    const KEY = "AIzaSyCqKu03FtSNX37FPFWib7xtfIwXt2NNIBs";
-    const IMG = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3:generateContent?key=${KEY}`;
-    const TEXT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
-    
+    // === KEY FAL.AI CỦA BẠN ĐÃ ĐƯỢC DÁN SẴN ===
+    const FAL_KEY = "42fe43f6-7ca7-48f5-b96f-ff387bfd6e04:0d9ee3bc7405ee201b0068627d80101e";
+
     let current = 2;
-    const canvas = document.getElementById('canvas');
+    const canvas = document.getElementById('postcard-canvas');
     const container = document.getElementById('postcard-container');
-    function L(n){return document.getElementById('l'+n)}
-    
-    function openTab(n){
-        document.querySelectorAll('#tab1,#tab2,#tab3').forEach(e=>e.style.display='none');
-        document.getElementById('tab'+n).style.display='block';
-        document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===n-1));
+
+    function L(n) { return document.getElementById('l' + n); }
+
+    // Tab
+    function openTab(n) {
+        ['tab1','tab2','tab3'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        document.getElementById('tab'+n).classList.remove('hidden');
+        document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('border-blue-600', i===n-1));
+        document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('text-blue-600', i===n-1));
     }
-    function select(n){
-        document.querySelectorAll('.layer-text').forEach(e=>e.classList.remove('layer-selected'));
-        L(n).classList.add('layer-selected');
-        current=n;
-        document.getElementById('txt').value = L(n).innerText;
+
+    // Layer
+    function selectLayer(id) {
+        document.querySelectorAll('.layer-text').forEach(l => l.classList.remove('layer-selected'));
+        L(id).classList.add('layer-selected');
+        current = id;
+        document.getElementById('textcontent').value = L(id).innerText;
     }
-    function pos(){
+
+    function updateLayerText() { L(current).innerText = document.getElementById('textcontent').value; }
+
+    function setStyle(prop, val) {
         const el = L(current);
-        el.style.left = document.getElementById('x').value + '%';
-        el.style.top = document.getElementById('y').value + '%';
-        el.style.transform = `translate(-50%,-50%) rotate(${document.getElementById('rot').value}deg)`;
+        if (prop === 'font-family') {
+            el.className = el.className.replace(/font-\w+/g, '');
+            el.classList.add(val);
+        } else el.style[prop] = val;
     }
-    function ratio(r){
-        const map = {'16-9':'56.25%','1-1':'100%','3-2':'66.67%','2-3':'150%','7-5':'71.43%','5-7':'140%'};
+
+    function toggleBold() { L(current).classList.toggle('font-bold'); }
+    function toggleItalic() { L(current).classList.toggle('italic'); }
+    function toggleShadow() { L(current).classList.toggle('text-shadow-custom'); }
+
+    function updatePos() {
+        const el = L(current);
+        el.style.left = document.getElementById('posx').value + '%';
+        el.style.top = document.getElementById('posy').value + '%';
+        el.style.transform = `translate(-50%,-50%) rotate(${document.getElementById('rotate').value}deg)`;
+    }
+
+    function setBgColor(c) {
+        canvas.style.backgroundColor = c;
+        canvas.style.backgroundImage = 'none';
+    }
+
+    // Tỷ lệ
+    function setRatio(r) {
+        const map = {'16-9':'56.25%','1-1':'100%','3-2':'66.66%','2-3':'150%','7-5':'71.42%','5-7':'140%'};
         container.style.paddingTop = map[r];
-        document.querySelectorAll('.ratio-btn').forEach(b=>b.classList.remove('active'));
-        event.target.classList.add('active');
+        document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('border-blue-600','bg-blue-50'));
+        event.target.classList.add('border-blue-600','bg-blue-50');
     }
-    async function genImg(){
-        const p = document.getElementById('prompt').value || "beautiful postcard background";
-        document.getElementById('loading').style.display='flex';
-        const res = await fetch(IMG,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({instances:[{prompt:p}]})});
-        const data = await res.json();
-        const url = 'data:image/png;base64,'+data.predictions[0].bytesBase64;
-        canvas.style.backgroundImage = `url('${url}')`;
-        document.getElementById('loading').style.display='none';
+
+    // === FLUX AI TẠO NỀN (ĐÃ DÁN KEY CỦA BẠN) ===
+    async function generateBg() {
+        const prompt = document.getElementById('bg-prompt').value.trim() || "beautiful romantic postcard background, ultra detailed, cinematic";
+        document.getElementById('loading').classList.remove('hidden');
+
+        try {
+            const res = await fetch("https://fal.run/fal-ai/flux/schnell", {
+                method: "POST",
+                headers: {
+                    "Authorization": "Key " + FAL_KEY,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    prompt: prompt + ", postcard background, high resolution, professional",
+                    image_size: "landscape_16_9",
+                    sync_mode: true
+                })
+            });
+
+            const data = await res.json();
+            const url = data.images[0].url;
+
+            canvas.style.backgroundImage = `url('${url}')`;
+            canvas.style.backgroundSize = "cover";
+            canvas.style.backgroundPosition = "center";
+            alert("Tạo nền thành công! Flux AI đẹp hơn Gemini 10 lần luôn 😍");
+        } catch (e) {
+            console.error(e);
+            alert("Lỗi rồi! Thử lại sau vài giây nhé (Flux đang đông)");
+        } finally {
+            document.getElementById('loading').classList.add('hidden');
+        }
     }
-    function savePNG(){
-        document.querySelectorAll('.layer-selected').forEach(e=>e.classList.remove('layer-selected'));
-        html2canvas(canvas,{scale:2}).then(c=>c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='postcard.png';a.click()}));
+
+    // Xuất file
+    function exportPNG() {
+        document.querySelectorAll('.layer-selected').forEach(e => e.classList.remove('layer-selected'));
+        html2canvas(canvas, {scale: 2}).then(c => c.toBlob(b => {
+            const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'postcard.png'; a.click();
+        }));
     }
-    function saveJPG(){
-        html2canvas(canvas,{scale:2}).then(c=>c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='postcard.jpg';a.click();},'image/jpeg',0.9));
+    function exportJPG() {
+        html2canvas(canvas, {scale: 2}).then(c => c.toBlob(b => {
+            const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'postcard.jpg'; a.click();
+        }, 'image/jpeg', 0.95));
     }
+
     // Khởi động
-    select(2); openTab(1); ratio('16-9');
+    openTab(1);
+    selectLayer(2);
+    setRatio('16-9');
 </script>
 </body>
 </html>
