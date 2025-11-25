@@ -184,28 +184,41 @@
         event.target.classList.add('border-blue-600','bg-blue-50');
     }
 
-    // === FLUX AI TẠO NỀN (ĐÃ DÁN KEY CỦA BẠN) ===
+    // === TOKEN AI HUNGGINGFACE TẠO NỀN (ĐÃ DÁN KEY CỦA BẠN) ===
     async function generateBg() {
-    const prompt = document.getElementById('bg-prompt').value.trim() || "beautiful romantic postcard background";
+    const prompt = document.getElementById('bg-prompt').value.trim() || "beautiful romantic postcard background, ultra detailed";
+
     document.getElementById('loading').classList.remove('hidden');
 
+    // === DÁN TOKEN HUGGING FACE CỦA BẠN VÀO ĐÂY ===
+    const HF_TOKEN = "5995330d-ad6a-42b5-b2b0-1b76633ec706:2e95fa31b1baa7098d47d7eda3f627e5";  // ← thay bằng token bạn vừa copy
+
     try {
-        const res = await fetch("https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell", {
+        const response = await fetch("https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ inputs: prompt + ", postcard background high res" })
+            headers: {
+                "Authorization": "Bearer " + HF_TOKEN,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                inputs: prompt + ", postcard background, professional photography, high resolution"
+            })
         });
 
-        if (!res.ok) throw new Error("Hugging Face busy");
+        if (!response.ok) throw new Error("Hugging Face đang đông");
 
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
 
-        canvas.style.backgroundImage = `url('${url}')`;
+        const canvas = document.getElementById('postcard-canvas') || document.getElementById('canvas');
+        canvas.style.backgroundImage = `url('${imageUrl}')`;
         canvas.style.backgroundSize = "cover";
-        alert("Tạo nền thành công bằng Hugging Face Flux! (Miễn phí vĩnh viễn 😊)");
-    } catch (e) {
-        alert("Lỗi tạm thời – thử lại sau 1 phút (Hugging Face đôi khi đông)");
+        canvas.style.backgroundPosition = "center";
+
+        alert("Tạo nền thành công bằng Hugging Face FLUX! Siêu đẹp luôn nha 😍");
+    } catch (error) {
+        console.error(error);
+        alert("Lỗi rồi! Thử lại sau 30 giây hoặc dùng fal.ai key mới nhé");
     } finally {
         document.getElementById('loading').classList.add('hidden');
     }
@@ -230,5 +243,4 @@
     setRatio('16-9');
 </script>
 </body>
-
 </html>
