@@ -186,9 +186,12 @@
 
     // === FLUX AI TẠO NỀN (ĐÃ DÁN KEY CỦA BẠN) ===
     async function generateBg() {
-        const prompt = document.getElementById('bg-prompt').value.trim() || "beautiful romantic postcard background, ultra detailed, cinematic";
-        document.getElementById('loading').classList.remove('hidden');
+    const prompt = document.getElementById('bg-prompt').value.trim() || "beautiful romantic postcard background";
+    document.getElementById('loading').classList.remove('hidden');
 
+    const FAL_KEY = "42fe43f6-7ca7-48f5-b96f-ff387bfd6e04:0d9ee3bc7405ee201b0068627d80101e";  // Key của bạn
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
         try {
             const res = await fetch("https://fal.run/fal-ai/flux/schnell", {
                 method: "POST",
@@ -197,26 +200,31 @@
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    prompt: prompt + ", postcard background, high resolution, professional",
+                    prompt: prompt + ", postcard background, high resolution",
                     image_size: "landscape_16_9",
                     sync_mode: true
                 })
             });
+
+            if (!res.ok) throw new Error("Server busy");
 
             const data = await res.json();
             const url = data.images[0].url;
 
             canvas.style.backgroundImage = `url('${url}')`;
             canvas.style.backgroundSize = "cover";
-            canvas.style.backgroundPosition = "center";
-            alert("Tạo nền thành công! Flux AI đẹp hơn Gemini 10 lần luôn 😍");
+            alert("Tạo nền thành công! (Lần thử " + attempt + ")");
+            return;  // Thành công, thoát vòng lặp
         } catch (e) {
-            console.error(e);
-            alert("Lỗi rồi! Thử lại sau vài giây nhé (Flux đang đông)");
-        } finally {
-            document.getElementById('loading').classList.add('hidden');
+            if (attempt === 3) {
+                alert("Lỗi sau 3 lần thử! Flux đang đông quá – thử Hugging Face thay thế nhé.");
+                break;
+            }
+            await new Promise(resolve => setTimeout(resolve, 5000 * attempt));  // Delay tăng dần: 5s, 10s
         }
     }
+    document.getElementById('loading').classList.add('hidden');
+}
 
     // Xuất file
     function exportPNG() {
